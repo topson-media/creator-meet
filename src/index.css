@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+
+  body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    color: #0f172a;
+    background-color: #f8fafc;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  .dark body, body.dark {
+    color: #ffffff;
+    background-color: #060919;
+  }
+
+  /* Ensure text visibility in light mode */
+  :root:not(.dark) {
+    color-scheme: light;
+  }
+  :root.dark {
+    color-scheme: dark;
+  }
+}
+
+/* Custom glow and backdrop effects */
+.navy-bg-gradient {
+  background: radial-gradient(circle at 50% 0%, #0d1538 0%, #060919 100%);
+}
+
+.navy-card {
+  background: rgba(13, 20, 48, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.navy-card-hover:hover {
+  border-color: rgba(255, 46, 147, 0.4);
+  box-shadow: 0 10px 30px -10px rgba(255, 46, 147, 0.2);
+}
+
+.gradient-btn-primary {
+  background: linear-gradient(135deg, #FF1E82 0%, #FF5A5F 100%);
+  transition: all 0.2s ease;
+}
+
+.gradient-btn-primary:hover {
+  opacity: 0.93;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(255, 30, 130, 0.4);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(6, 9, 25, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 46, 147, 0.5);
+}

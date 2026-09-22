@@ -1,0 +1,6 @@
+{
+  "name": "Creator Meet",
+  "description": "The social network for creators. Meet creators, build connections, and grow together.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

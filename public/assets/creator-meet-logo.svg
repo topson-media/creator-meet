@@ -1,0 +1,19 @@
+<svg width="54" height="44" viewBox="0 0 54 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cyanGrad" x1="4" y1="2" x2="26" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="60%" stop-color="#0080FF" />
+      <stop offset="100%" stop-color="#0055D4" />
+    </linearGradient>
+    <linearGradient id="magentaGrad" x1="28" y1="2" x2="50" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF3399" />
+      <stop offset="60%" stop-color="#FF147A" />
+      <stop offset="100%" stop-color="#D9006C" />
+    </linearGradient>
+  </defs>
+  <circle cx="16" cy="11" r="7" fill="url(#cyanGrad)" />
+  <path d="M 5 38 C 5 24, 12 21, 21 21 C 24.5 21, 26 23.5, 26 27 C 26 33, 19 40, 9 40 C 6.5 40, 5 39.5, 5 38 Z" fill="url(#cyanGrad)" />
+  <polygon points="12,28 12,35 18,31.5" fill="#FFFFFF" />
+  <circle cx="38" cy="11" r="7" fill="url(#magentaGrad)" />
+  <path d="M 49 38 C 49 24, 42 21, 33 21 C 29.5 21, 28 23.5, 28 27 C 28 33, 35 40, 45 40 C 47.5 40, 49 39.5, 49 38 Z" fill="url(#magentaGrad)" />
+</svg>

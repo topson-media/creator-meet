@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Profile information for registered creators and fans",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "username": { "type": "string", "maxLength": 50, "pattern": "^[a-zA-Z0-9_]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 120 },
+        "role": { "type": "string", "enum": ["creator", "fan"] },
+        "accountType": { "type": "string", "enum": ["creator", "fan"] },
+        "avatar": { "type": "string" },
+        "bio": { "type": "string", "maxLength": 500 },
+        "emailVerified": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "fullName", "username", "email", "role", "accountType", "createdAt"]
+    },
+    "UsernameIndex": {
+      "title": "Username Index",
+      "description": "Unique index to verify usernames",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "username": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["userId", "username"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles indexed by Firebase Auth UID"
+    },
+    "/usernames/{usernameLower}": {
+      "schema": "UsernameIndex",
+      "description": "Unique username tracking"
+    }
+  }
+}
