@@ -1,12 +1,8 @@
 {
-  "projectId": "nomadic-palisade-t14dk",
-  "appId": "1:89900997204:web:fbb37e481141096435abc1",
-  "apiKey": "AIzaSyDPOIr-Mz8bS-5m54x4OgzdjSloY94pLo0",
-  "authDomain": "nomadic-palisade-t14dk.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-creatormeet-53a84375-14d2-4cb1-914b-11f76e630487",
-  "storageBucket": "nomadic-palisade-t14dk.firebasestorage.app",
-  "messagingSenderId": "89900997204",
-  "measurementId": "",
-  "oAuthClientId": "89900997204-abtfprkc04abp2e64ao0ihmvms0ci56u.apps.googleusercontent.com",
-  "recaptchaSiteKey": ""
+  "apiKey": "AIzaSyCQshZA0az7e642_h_euTEwKuIDDd889uY",
+  "authDomain": "creator-meet-app.firebaseapp.com",
+  "projectId": "creator-meet-app",
+  "storageBucket": "creator-meet-app.firebasestorage.app",
+  "messagingSenderId": "700692888483",
+  "appId": "1:700692888483:web:a1aab93557f92637bd3816"
 }
