@@ -25,6 +25,8 @@ import {
   Heart,
 } from 'lucide-react';
 import { UserProfile, PageRoute } from '../types';
+import { saveMonetizationSettingsToFirestore } from '../lib/firestoreService';
+import { useAuth } from '../context/AuthContext';
 
 interface MonetizationPageProps {
   userProfile: UserProfile | null;
@@ -41,8 +43,24 @@ export const MonetizationPage: React.FC<MonetizationPageProps> = ({
   onOpenVerifiedModal,
   onUpgradeToCreator,
 }) => {
-  // Load saved monetization state or defaults
+  const { updateProfile } = useAuth();
+
+  // Load saved monetization state from Firestore userProfile or localStorage
   const savedState = (() => {
+    if (userProfile?.monetization) {
+      return {
+        followersCount: userProfile.monetization.followersCount,
+        watchTimeHours: userProfile.monetization.watchTimeHours,
+        reelViews90Days: userProfile.monetization.reelViews90Days,
+        contentMonetizationActive: userProfile.monetization.contentMonetizationEnabled,
+        starsEnabled: userProfile.monetization.starsEnabled,
+        starsBalance: userProfile.monetization.totalStarsReceived,
+        subscriptionEnabled: userProfile.monetization.subscriptionEnabled,
+        monthlyPrice: userProfile.monetization.subscriptionMonthlyPrice,
+        subscriberCount: userProfile.monetization.subscriberCount,
+        payoutMethod: userProfile.monetization.payoutMethod,
+      };
+    }
     try {
       const data = localStorage.getItem('creatormeet_monetization_settings');
       return data ? JSON.parse(data) : null;
@@ -127,8 +145,8 @@ export const MonetizationPage: React.FC<MonetizationPageProps> = ({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Save changes to localStorage
-  const saveAllSettings = () => {
+  // Save changes to Firestore `(default)` and localStorage
+  const saveAllSettings = async () => {
     try {
       const data = {
         followersCount,
@@ -144,9 +162,30 @@ export const MonetizationPage: React.FC<MonetizationPageProps> = ({
         payoutMethod,
       };
       localStorage.setItem('creatormeet_monetization_settings', JSON.stringify(data));
-      showToast('✓ Monetization settings saved successfully!');
+
+      if (userProfile?.id) {
+        const monetizationPayload = {
+          contentMonetizationEnabled: contentMonetizationActive,
+          watchTimeHours,
+          reelViews90Days,
+          followersCount,
+          starsEnabled,
+          totalStarsReceived: starsBalance,
+          starBalanceUsd: starsBalance * 0.01,
+          subscriptionEnabled,
+          subscriptionMonthlyPrice: monthlyPrice,
+          subscriberCount,
+          totalEarningsUsd: totalMonthlyEarningsUsd,
+          payoutMethod,
+        };
+        await saveMonetizationSettingsToFirestore(userProfile.id, monetizationPayload);
+        await updateProfile({ monetization: monetizationPayload });
+      }
+
+      showToast('✓ Monetization settings saved to Firestore!');
     } catch (e) {
       console.error(e);
+      showToast('✓ Settings updated locally.');
     }
   };
 

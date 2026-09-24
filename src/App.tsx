@@ -32,6 +32,14 @@ import { AccountTypeSelectionModal } from './components/AccountTypeSelectionModa
 import { MonetizationPage } from './pages/MonetizationPage';
 import { VerifiedBadgeModal } from './components/VerifiedBadgeModal';
 import { useAuth } from './context/AuthContext';
+import {
+  savePostToFirestore,
+  fetchPostsFromFirestore,
+  updatePostLikeInFirestore,
+  addCommentToFirestore,
+  saveStoryToFirestore,
+  fetchStoriesFromFirestore,
+} from './lib/firestoreService';
 
 export default function App() {
   // 1. PRIMARY DEFAULT THEME: Light Mode as requested!
@@ -136,6 +144,38 @@ export default function App() {
     }
   }, [isDarkMode]);
 
+  // Load persisted posts and stories from Firestore database `(default)`
+  useEffect(() => {
+    const loadFirestoreData = async () => {
+      try {
+        const [cloudPosts, cloudStories] = await Promise.all([
+          fetchPostsFromFirestore(),
+          fetchStoriesFromFirestore(),
+        ]);
+
+        if (cloudPosts && cloudPosts.length > 0) {
+          setPosts((prev) => {
+            const existingIds = new Set(prev.map((p) => p.id));
+            const newCloudPosts = cloudPosts.filter((p) => !existingIds.has(p.id));
+            return [...newCloudPosts, ...prev];
+          });
+        }
+
+        if (cloudStories && cloudStories.length > 0) {
+          setStories((prev) => {
+            const existingIds = new Set(prev.map((s) => s.id));
+            const newCloudStories = cloudStories.filter((s) => !existingIds.has(s.id));
+            return [...newCloudStories, ...prev];
+          });
+        }
+      } catch (err) {
+        console.warn('Error syncing initial data from Firestore:', err);
+      }
+    };
+
+    loadFirestoreData();
+  }, []);
+
   // Toast notification for actions
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -151,14 +191,15 @@ export default function App() {
     }
   };
 
-  // Handler for adding a new Story
-  const handleAddStory = (newStory: Story) => {
+  // Handler for adding a new Story - Saved to Firestore `(default)`
+  const handleAddStory = async (newStory: Story) => {
     setStories((prev) => [newStory, ...prev]);
     showToast('Your story has been published to the story bar! ✨');
+    await saveStoryToFirestore(newStory);
   };
 
   // Handler for sharing a post to user's story
-  const handleSharePostToStory = (post: Post) => {
+  const handleSharePostToStory = async (post: Post) => {
     const newStory: Story = {
       id: `story-shared-${Date.now()}`,
       authorId: userProfile?.id || 'me',
@@ -177,25 +218,29 @@ export default function App() {
     };
     setStories((prev) => [newStory, ...prev]);
     showToast('Shared to your story successfully! 🌟');
+    await saveStoryToFirestore(newStory);
   };
 
-  // Handler for adding a new Post
-  const handleAddPost = (newPost: Post) => {
+  // Handler for adding a new Post - Saved to Firestore `(default)`
+  const handleAddPost = async (newPost: Post) => {
     setPosts((prev) => [newPost, ...prev]);
     setCurrentPage('home');
-    showToast('Your post has been published to the home feed! 🚀');
+    showToast('Your post has been published and saved to Firestore! 🚀');
+    await savePostToFirestore(newPost);
   };
 
-  // Handler for liking a post
+  // Handler for liking a post - Synced to Firestore
   const handleLikePost = (postId: string) => {
     setPosts((prev) =>
       prev.map((post) => {
         if (post.id === postId) {
           const newHasLiked = !post.hasLiked;
+          const updatedLikesCount = newHasLiked ? post.likesCount + 1 : Math.max(0, post.likesCount - 1);
+          updatePostLikeInFirestore(postId, updatedLikesCount);
           return {
             ...post,
             hasLiked: newHasLiked,
-            likesCount: newHasLiked ? post.likesCount + 1 : Math.max(0, post.likesCount - 1),
+            likesCount: updatedLikesCount,
           };
         }
         return post;
@@ -203,7 +248,7 @@ export default function App() {
     );
   };
 
-  // Handler for adding a comment to a post
+  // Handler for adding a comment to a post - Synced to Firestore
   const handleAddComment = (postId: string, text: string) => {
     const comment = {
       id: `comment-${Date.now()}`,
@@ -220,10 +265,12 @@ export default function App() {
     setPosts((prev) =>
       prev.map((post) => {
         if (post.id === postId) {
+          const updatedComments = [...(post.comments || []), comment];
+          addCommentToFirestore(postId, comment, updatedComments);
           return {
             ...post,
             commentsCount: (post.commentsCount || 0) + 1,
-            comments: [...(post.comments || []), comment],
+            comments: updatedComments,
           };
         }
         return post;

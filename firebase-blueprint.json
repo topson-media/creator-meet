@@ -2,7 +2,7 @@
   "entities": {
     "UserProfile": {
       "title": "User Profile",
-      "description": "Profile information for registered creators and fans",
+      "description": "Profile information for registered creators and fans including monetization settings",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -12,8 +12,16 @@
         "role": { "type": "string", "enum": ["creator", "fan"] },
         "accountType": { "type": "string", "enum": ["creator", "fan"] },
         "avatar": { "type": "string" },
+        "coverImage": { "type": "string" },
         "bio": { "type": "string", "maxLength": 500 },
+        "country": { "type": "string", "maxLength": 80 },
+        "flag": { "type": "string", "maxLength": 10 },
+        "category": { "type": "string", "maxLength": 60 },
+        "followersCount": { "type": "number" },
+        "followingCount": { "type": "number" },
         "emailVerified": { "type": "boolean" },
+        "monetization": { "type": "object" },
+        "twoFactorEnabled": { "type": "boolean" },
         "createdAt": { "type": "string" },
         "updatedAt": { "type": "string" }
       },
@@ -28,6 +36,121 @@
         "username": { "type": "string", "maxLength": 50 }
       },
       "required": ["userId", "username"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Community and creator post in the feed",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string", "maxLength": 100 },
+        "authorUsername": { "type": "string", "maxLength": 50 },
+        "authorAvatar": { "type": "string" },
+        "authorRole": { "type": "string", "enum": ["creator", "fan"] },
+        "content": { "type": "string", "maxLength": 5000 },
+        "mediaUrl": { "type": "string" },
+        "mediaType": { "type": "string", "enum": ["image", "video"] },
+        "musicTitle": { "type": "string", "maxLength": 150 },
+        "musicArtist": { "type": "string", "maxLength": 150 },
+        "musicUrl": { "type": "string" },
+        "tags": { "type": "array" },
+        "category": { "type": "string", "maxLength": 60 },
+        "likesCount": { "type": "number" },
+        "commentsCount": { "type": "number" },
+        "collabOpen": { "type": "boolean" },
+        "collabRole": { "type": "string", "maxLength": 100 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "authorId", "authorName", "authorUsername", "content", "createdAt"]
+    },
+    "PostComment": {
+      "title": "Post Comment",
+      "description": "User comment on a post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "postId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string", "maxLength": 100 },
+        "authorUsername": { "type": "string", "maxLength": 50 },
+        "authorAvatar": { "type": "string" },
+        "authorRole": { "type": "string", "enum": ["creator", "fan"] },
+        "content": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "authorId", "authorName", "content", "createdAt"]
+    },
+    "Story": {
+      "title": "Story",
+      "description": "Ephemeral 24h story posted by a creator or fan",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string", "maxLength": 100 },
+        "authorUsername": { "type": "string", "maxLength": 50 },
+        "authorAvatar": { "type": "string" },
+        "authorRole": { "type": "string", "enum": ["creator", "fan"] },
+        "mediaUrl": { "type": "string" },
+        "mediaType": { "type": "string", "enum": ["image", "video"] },
+        "caption": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string" },
+        "viewsCount": { "type": "number" }
+      },
+      "required": ["id", "authorId", "authorName", "mediaUrl", "createdAt"]
+    },
+    "CollabRequest": {
+      "title": "Collab Request",
+      "description": "Collaboration opportunity posted by creators",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "creatorId": { "type": "string" },
+        "creatorName": { "type": "string", "maxLength": 100 },
+        "handle": { "type": "string", "maxLength": 50 },
+        "avatar": { "type": "string" },
+        "title": { "type": "string", "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "neededRole": { "type": "string", "maxLength": 100 },
+        "budget": { "type": "string", "maxLength": 50 },
+        "platform": { "type": "string", "maxLength": 50 },
+        "category": { "type": "string", "maxLength": 60 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "creatorId", "creatorName", "title", "neededRole", "createdAt"]
+    },
+    "DirectMessage": {
+      "title": "Direct Message",
+      "description": "Direct message sent between users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "conversationId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "senderAvatar": { "type": "string" },
+        "text": { "type": "string", "maxLength": 3000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "conversationId", "senderId", "text", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notification for social events",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "recipientId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "senderAvatar": { "type": "string" },
+        "type": { "type": "string", "enum": ["like", "follow", "comment", "collab", "gift", "subscription"] },
+        "text": { "type": "string", "maxLength": 300 },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "recipientId", "type", "text", "createdAt"]
     }
   },
   "firestore": {
@@ -38,6 +161,30 @@
     "/usernames/{usernameLower}": {
       "schema": "UsernameIndex",
       "description": "Unique username tracking"
+    },
+    "/posts/{postId}": {
+      "schema": "Post",
+      "description": "Feed posts created by creators and fans"
+    },
+    "/posts/{postId}/comments/{commentId}": {
+      "schema": "PostComment",
+      "description": "Comments attached to posts"
+    },
+    "/stories/{storyId}": {
+      "schema": "Story",
+      "description": "Stories shared by creators and fans"
+    },
+    "/collabs/{collabId}": {
+      "schema": "CollabRequest",
+      "description": "Open collaboration requests"
+    },
+    "/conversations/{convId}/messages/{msgId}": {
+      "schema": "DirectMessage",
+      "description": "Direct conversation messages"
+    },
+    "/notifications/{notifId}": {
+      "schema": "Notification",
+      "description": "User notifications"
     }
   }
 }

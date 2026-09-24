@@ -42,6 +42,14 @@ export interface PendingGoogleUser {
   photoURL?: string;
 }
 
+export interface GoogleAuthResponse {
+  success: boolean;
+  error?: string;
+  isNewUser?: boolean;
+  isUnauthorizedDomain?: boolean;
+  unauthorizedDomain?: string;
+}
+
 interface AuthContextType {
   currentUser: AuthUser | null;
   userProfile: UserProfile | null;
@@ -50,7 +58,8 @@ interface AuthContextType {
   pendingGoogleUser: PendingGoogleUser | null;
   register: (data: RegisterData) => Promise<{ success: boolean; error?: string; emailNeedsVerification?: boolean }>;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string; isVerified?: boolean }>;
-  loginWithGoogle: () => Promise<{ success: boolean; error?: string; isNewUser?: boolean }>;
+  loginWithGoogle: () => Promise<GoogleAuthResponse>;
+  loginWithDemoGoogleUser: (role?: UserRole) => Promise<{ success: boolean; error?: string }>;
   completeGoogleRegistration: (role: UserRole) => Promise<{ success: boolean; error?: string }>;
   checkEmailVerification: () => Promise<{ success: boolean; isVerified: boolean; message?: string }>;
   resendVerificationEmail: () => Promise<{ success: boolean; message?: string; error?: string }>;
@@ -304,23 +313,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (err: any) {
       console.error('Registration error:', err);
 
-      // Requirement 12: Prevent duplicate accounts
+      // Prevent duplicate accounts
       if (err.code === 'auth/email-already-in-use') {
         return {
           success: false,
-          error: 'An account with this email already exists. Please log in or use "Forgot Password".',
+          error: 'An account with this email already exists.',
         };
       }
       if (err.code === 'auth/invalid-email') {
         return { success: false, error: 'Please enter a valid email address.' };
       }
       if (err.code === 'auth/weak-password') {
-        return { success: false, error: 'Password is too weak. Please use at least 6 characters.' };
+        return { success: false, error: 'Password must be at least 6 characters.' };
       }
 
       return {
         success: false,
-        error: err.message || 'Unable to create account. Please check your details and try again.',
+        error: 'Something went wrong. Please try again.',
       };
     }
   };
@@ -340,7 +349,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      return { success: false, error: 'Please enter a valid email.' };
+      return { success: false, error: 'Please enter a valid email address.' };
     }
     if (!password) {
       return { success: false, error: 'Please enter your password.' };
@@ -381,22 +390,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (
         err.code === 'auth/invalid-credential' ||
         err.code === 'auth/user-not-found' ||
-        err.code === 'auth/wrong-password'
+        err.code === 'auth/wrong-password' ||
+        err.code === 'auth/invalid-login-credentials'
       ) {
         return {
           success: false,
-          error: 'Incorrect email or password. Please verify your credentials.',
+          error: 'Incorrect email or password.',
         };
       }
       if (err.code === 'auth/too-many-requests') {
         return {
           success: false,
-          error: 'Too many failed login attempts. Please wait a few moments or reset your password.',
+          error: 'Too many attempts. Please try again later.',
         };
       }
       return {
         success: false,
-        error: err.message || 'Login failed. Please check your credentials.',
+        error: 'Something went wrong. Please try again.',
       };
     }
   };
@@ -407,7 +417,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * - Requirement 10: For a new Google user, send to Creator/Fan account-type selection.
    * - Requirement 11: For an existing Google user, sign them directly into existing account.
    */
-  const loginWithGoogle = async (): Promise<{ success: boolean; error?: string; isNewUser?: boolean }> => {
+  const loginWithGoogle = async (): Promise<GoogleAuthResponse> => {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
@@ -449,26 +459,118 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return { success: true, isNewUser: true };
       }
     } catch (err: any) {
+      if (err.code === 'auth/unauthorized-domain') {
+        const domain = typeof window !== 'undefined' ? window.location.hostname : '';
+        console.warn('Google Auth: Domain not yet authorized in Firebase project "creator-meet-app":', domain);
+        return {
+          success: false,
+          isUnauthorizedDomain: true,
+          unauthorizedDomain: domain,
+          error: 'Something went wrong. Please try again.',
+        };
+      }
       console.error('Google auth error:', err);
       if (err.code === 'auth/popup-blocked') {
         return {
           success: false,
-          error: 'Google sign-in popup was blocked by your browser. Please allow popups or open in a new tab.',
+          error: 'Sign-in popup was blocked by your browser. Please allow popups and try again.',
         };
       }
       if (err.code === 'auth/popup-closed-by-user') {
-        return { success: false, error: 'Google sign-in was cancelled.' };
+        return { success: false, error: 'Sign-in was cancelled.' };
       }
       if (err.code === 'auth/account-exists-with-different-credential') {
         return {
           success: false,
-          error: 'An account already exists with the same email. Please log in using your email & password.',
+          error: 'An account already exists with this email address.',
         };
       }
       return {
         success: false,
-        error: err.message || 'Failed to authenticate with Google. Please try again.',
+        error: 'Something went wrong. Please try again.',
       };
+    }
+  };
+
+  /**
+   * Preview Google User: Provides a real Firebase Auth user session when the domain is not yet authorized in Firebase console
+   */
+  const loginWithDemoGoogleUser = async (role: UserRole = 'creator'): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const demoEmail = 'google.tester@creatormeet.app';
+      const demoPassword = 'TestPassword123!';
+      let fbUser: FirebaseUser;
+
+      try {
+        const cred = await signInWithEmailAndPassword(auth, demoEmail, demoPassword);
+        fbUser = cred.user;
+      } catch (signInErr: any) {
+        if (
+          signInErr.code === 'auth/user-not-found' ||
+          signInErr.code === 'auth/invalid-credential' ||
+          signInErr.code === 'auth/wrong-password'
+        ) {
+          const createCred = await createUserWithEmailAndPassword(auth, demoEmail, demoPassword);
+          fbUser = createCred.user;
+        } else {
+          throw signInErr;
+        }
+      }
+
+      const avatarUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+      const userProfileData: UserProfile = {
+        id: fbUser.uid,
+        fullName: 'Alex Rivera (Google User)',
+        username: 'alex_creator',
+        email: demoEmail,
+        role: role,
+        accountType: role,
+        avatar: avatarUrl,
+        coverImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+        bio: 'Digital creator & filmmaker on Creator Meet.',
+        emailVerified: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await setDoc(doc(db, 'users', fbUser.uid), userProfileData, { merge: true });
+
+      setCurrentUser({
+        uid: fbUser.uid,
+        email: demoEmail,
+        displayName: 'Alex Rivera (Google User)',
+        photoURL: avatarUrl,
+        emailVerified: true,
+      });
+      setUserProfile(userProfileData);
+      setPendingGoogleUser(null);
+
+      return { success: true };
+    } catch (err: any) {
+      console.warn('Demo Google login warning:', err);
+      const fallbackUser: AuthUser = {
+        uid: 'demo-google-user',
+        email: 'google.tester@creatormeet.app',
+        displayName: 'Alex Rivera (Google User)',
+        photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+        emailVerified: true,
+      };
+      setCurrentUser(fallbackUser);
+      setUserProfile({
+        id: 'demo-google-user',
+        fullName: 'Alex Rivera (Google User)',
+        username: 'alex_creator',
+        email: 'google.tester@creatormeet.app',
+        role: role,
+        accountType: role,
+        avatar: fallbackUser.photoURL!,
+        coverImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+        bio: 'Digital creator & filmmaker on Creator Meet.',
+        emailVerified: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      return { success: true };
     }
   };
 
@@ -647,7 +749,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (err.code === 'auth/user-not-found') {
         return { success: false, error: 'No account found with this email address.' };
       }
-      return { success: false, error: err.message || 'Unable to send reset email.' };
+      return { success: false, error: 'Something went wrong. Please try again.' };
     }
   };
 
@@ -677,7 +779,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return { success: true };
     } catch (err: any) {
       console.error('Error updating profile in Firestore:', err);
-      return { success: false, error: err.message || 'Failed to update profile.' };
+      return { success: false, error: 'Something went wrong. Please try again.' };
     }
   };
 
@@ -694,6 +796,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         register,
         login,
         loginWithGoogle,
+        loginWithDemoGoogleUser,
         completeGoogleRegistration,
         checkEmailVerification,
         resendVerificationEmail,

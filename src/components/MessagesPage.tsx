@@ -18,6 +18,7 @@ import {
 import { UserProfile } from '../types';
 import { AccountBadge } from './AccountBadge';
 import { ProfileDetailsData } from './UserProfileModal';
+import { saveMessageToFirestore } from '../lib/firestoreService';
 
 interface MessageItem {
   id: string;
@@ -185,6 +186,17 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({
       isMe: true,
       status: 'sent',
     };
+
+    // Save to Firestore `(default)`
+    saveMessageToFirestore(activeConvId, {
+      id: newMsg.id,
+      senderId: newMsg.senderId,
+      senderName: userProfile?.fullName || 'User',
+      senderAvatar: userProfile?.avatar || '',
+      text: newMsg.text,
+      timestamp: newMsg.timestamp,
+      isMe: true,
+    });
 
     setConversations((prev) =>
       prev.map((conv) => {
