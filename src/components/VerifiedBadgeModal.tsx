@@ -15,6 +15,10 @@ import {
   Eye,
   Check,
   ExternalLink,
+  FileText,
+  AlertCircle,
+  UserCheck,
+  DollarSign,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { AccountBadge } from './AccountBadge';
@@ -25,6 +29,7 @@ interface VerifiedBadgeModalProps {
   userProfile: UserProfile | null;
   onVerifiedSuccess: () => void;
   onViewProfile?: () => void;
+  onOpenAuth?: (tab: 'login' | 'signup') => void;
   isDarkMode: boolean;
 }
 
@@ -34,9 +39,11 @@ export const VerifiedBadgeModal: React.FC<VerifiedBadgeModalProps> = ({
   userProfile,
   onVerifiedSuccess,
   onViewProfile,
+  onOpenAuth,
   isDarkMode,
 }) => {
   const [previewWithBadge, setPreviewWithBadge] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<'checkout' | 'rules' | 'perks'>('checkout');
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('monthly');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'gpay' | 'paypal'>('card');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -151,12 +158,18 @@ export const VerifiedBadgeModal: React.FC<VerifiedBadgeModalProps> = ({
           <X size={18} />
         </button>
 
-        {/* Modal Hero Header with Cyan Radiance */}
+        {/* Modal Hero Header with Cyan Radiance & Sponsored Tag */}
         <div className="relative p-6 sm:p-8 bg-gradient-to-br from-[#00D2FF]/20 via-purple-600/15 to-transparent border-b border-inherit overflow-hidden">
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00D2FF]/20 border border-[#00D2FF]/40 text-[#00D2FF] text-xs font-bold mb-3 shadow-xs">
-              <ShieldCheck size={15} />
-              <span>Creator Meet Verified</span>
+            <div className="flex items-center gap-2 flex-wrap mb-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold shadow-xs">
+                <Sparkles size={13} className="text-amber-400" />
+                <span>Sponsored Program</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00D2FF]/20 border border-[#00D2FF]/40 text-[#00D2FF] text-xs font-bold shadow-xs">
+                <ShieldCheck size={14} />
+                <span>Creator Meet Verified</span>
+              </span>
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2 flex-wrap">
@@ -168,6 +181,48 @@ export const VerifiedBadgeModal: React.FC<VerifiedBadgeModalProps> = ({
             </p>
           </div>
         </div>
+
+        {/* Navigation Tabs: Pay & Activate | Official Rules | Verified Perks */}
+        {!paymentSuccess && !isAlreadyVerified && (
+          <div className="flex border-b border-inherit px-5 sm:px-7 bg-white/5 overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => setActiveTab('checkout')}
+              className={`py-3 px-3.5 text-xs sm:text-sm font-bold border-b-2 transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                activeTab === 'checkout'
+                  ? 'border-[#00D2FF] text-[#00D2FF]'
+                  : 'border-transparent text-slate-400 hover:text-white'
+              }`}
+            >
+              <CreditCard size={14} />
+              <span>Pay & Activate Blue Tick</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('rules')}
+              className={`py-3 px-3.5 text-xs sm:text-sm font-bold border-b-2 transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                activeTab === 'rules'
+                  ? 'border-[#00D2FF] text-[#00D2FF]'
+                  : 'border-transparent text-slate-400 hover:text-white'
+              }`}
+            >
+              <FileText size={14} />
+              <span>Verification Rules & Terms</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('perks')}
+              className={`py-3 px-3.5 text-xs sm:text-sm font-bold border-b-2 transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                activeTab === 'perks'
+                  ? 'border-[#00D2FF] text-[#00D2FF]'
+                  : 'border-transparent text-slate-400 hover:text-white'
+              }`}
+            >
+              <Sparkles size={14} />
+              <span>Verified Functions & 3x Reach</span>
+            </button>
+          </div>
+        )}
 
         {/* SUCCESS VIEW (If payment just completed or already verified) */}
         {paymentSuccess || isAlreadyVerified ? (
@@ -244,6 +299,166 @@ export const VerifiedBadgeModal: React.FC<VerifiedBadgeModalProps> = ({
                 className="w-full sm:w-auto px-6 py-2.5 rounded-full border border-slate-300 dark:border-white/20 hover:bg-white/10 text-xs sm:text-sm font-semibold transition cursor-pointer"
               >
                 Close & Return to Feed
+              </button>
+            </div>
+          </div>
+        ) : activeTab === 'rules' ? (
+          /* OFFICIAL VERIFICATION RULES & GUIDELINES TAB */
+          <div className="p-5 sm:p-7 space-y-6 animate-fade-in">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <FileText size={18} className="text-[#00D2FF]" />
+                <h3 className="text-base sm:text-lg font-black tracking-tight">
+                  Creator Meet Official Verification Rules & Eligibility
+                </h3>
+              </div>
+              <p className="text-xs text-slate-400">
+                Please review our official verification requirements. Verified members maintain the integrity and high trust of the Creator Meet ecosystem.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex items-center gap-2 font-black text-xs sm:text-sm text-cyan-400 mb-1.5">
+                  <ShieldCheck size={16} />
+                  <span>Rule 1: Authentic Creator Identity</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Your profile must represent a real person, registered creator entity, or established collective. Pseudonyms are permitted as long as you do not impersonate real-world public figures without parody tags.
+                </p>
+              </div>
+
+              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex items-center gap-2 font-black text-xs sm:text-sm text-[#FF2E93] mb-1.5">
+                  <UserCheck size={16} />
+                  <span>Rule 2: Minimum Profile Completeness</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Your profile must have an uploaded avatar, profile bio, cover image, and at least 1 published post or reel. Empty shell accounts are not eligible for badge display.
+                </p>
+              </div>
+
+              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex items-center gap-2 font-black text-xs sm:text-sm text-rose-400 mb-1.5">
+                  <AlertCircle size={16} />
+                  <span>Rule 3: Non-Impersonation & Brand Safety</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Misleading other users by duplicating usernames, brand trademarks, or claiming false official affiliation results in immediate badge revocation without refund and account termination.
+                </p>
+              </div>
+
+              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex items-center gap-2 font-black text-xs sm:text-sm text-amber-400 mb-1.5">
+                  <Lock size={16} />
+                  <span>Rule 4: Badge Non-Transferability</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  The blue tick verified badge is uniquely attached to your account ID. It cannot be sold, rented, transferred, or shared between multiple accounts.
+                </p>
+              </div>
+
+              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex items-center gap-2 font-black text-xs sm:text-sm text-emerald-400 mb-1.5">
+                  <CheckCircle2 size={16} />
+                  <span>Rule 5: Community Guidelines Compliance</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  All posts, reels, stories, and comments published by verified accounts must adhere to community anti-spam and intellectual property standards.
+                </p>
+              </div>
+
+              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex items-center gap-2 font-black text-xs sm:text-sm text-purple-400 mb-1.5">
+                  <DollarSign size={16} />
+                  <span>Rule 6: Transparent $9.99/mo Membership</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Your verification pass is maintained with active membership ($9.99/mo or $95/yr). The fee funds automated biometric protection, 3x feed server allocation, and priority support.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setActiveTab('checkout')}
+                className="w-full sm:w-auto px-6 py-3 rounded-2xl gradient-btn-primary text-white text-xs sm:text-sm font-black shadow-md cursor-pointer flex items-center justify-center gap-2"
+              >
+                <Check size={16} strokeWidth={3} />
+                <span>I Agree to Rules → Proceed to Pay ($9.99/mo)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('perks')}
+                className="w-full sm:w-auto px-5 py-3 rounded-2xl border border-white/15 hover:bg-white/10 text-xs sm:text-sm font-semibold transition cursor-pointer"
+              >
+                View 3x Reach & Perks
+              </button>
+            </div>
+          </div>
+        ) : activeTab === 'perks' ? (
+          /* VERIFIED FUNCTIONS & 3X REACH PERKS TAB */
+          <div className="p-5 sm:p-7 space-y-6 animate-fade-in">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h3 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
+                  <Sparkles size={18} className="text-[#FF2E93]" />
+                  <span>Functions of Verified Status & Subscription</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Here is everything unlocked when you activate your Blue Tick Creator Pass:
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('checkout')}
+                className="px-4 py-2 rounded-full gradient-btn-primary text-white text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5"
+              >
+                <span>Activate Now ($9.99/mo)</span>
+                <ArrowRight size={13} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {functionsList.map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={idx}
+                    className={`p-4 rounded-2xl border transition-all ${
+                      isDarkMode
+                        ? 'bg-white/5 border-white/10 hover:border-white/20'
+                        : 'bg-slate-50 border-slate-200 hover:border-slate-300 shadow-xs'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`w-9 h-9 rounded-xl ${item.bg} ${item.color} flex items-center justify-center shrink-0 mt-0.5`}
+                      >
+                        <Icon size={18} />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs sm:text-sm font-bold leading-snug">{item.title}</h4>
+                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setActiveTab('checkout')}
+                className="w-full py-3 px-4 rounded-2xl gradient-btn-primary text-white font-extrabold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer hover:opacity-95"
+              >
+                <ShieldCheck size={16} className="text-[#00D2FF]" />
+                <span>Get Verified Badge & Blue Tick ($9.99/mo)</span>
+                <ArrowRight size={15} />
               </button>
             </div>
           </div>
@@ -445,6 +660,24 @@ export const VerifiedBadgeModal: React.FC<VerifiedBadgeModalProps> = ({
                   : 'bg-gradient-to-br from-indigo-50/70 via-purple-50/40 to-white border-indigo-200 shadow-sm'
               }`}
             >
+              {!userProfile && onOpenAuth && (
+                <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-between gap-3 mb-4">
+                  <div className="text-xs text-amber-300">
+                    <span className="font-bold">Not registered yet?</span> Register an account first to link your permanent blue tick.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenAuth();
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shrink-0 cursor-pointer shadow-sm transition"
+                  >
+                    Register Account
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <div>
                   <h3 className="text-base font-black flex items-center gap-1.5">

@@ -118,7 +118,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             isDarkMode={isDarkMode}
           />
 
-          {/* Mobile / Tablet Permanent Verified Notification Banner */}
+          {/* Mobile / Tablet Sponsored Verified Notification Banner */}
           {onOpenVerifiedModal && (
             <div className="block lg:hidden">
               <button
@@ -131,8 +131,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                       ? 'bg-gradient-to-r from-cyan-950/40 via-[#080D26] to-purple-950/40 border-[#00D2FF]/40 text-white'
                       : 'bg-gradient-to-r from-cyan-50 via-white to-blue-50 border-cyan-300 text-slate-900'
                     : isDarkMode
-                    ? 'bg-gradient-to-r from-[#00D2FF]/20 via-[#080D26] to-[#FF2E93]/20 border-[#00D2FF]/40 hover:border-[#00D2FF]/70 text-white'
-                    : 'bg-gradient-to-r from-cyan-100/70 via-white to-pink-50 border-cyan-300 hover:border-cyan-400 text-slate-900'
+                    ? 'bg-gradient-to-r from-amber-500/15 via-[#080D26] to-[#00D2FF]/15 border-amber-500/40 hover:border-amber-400 text-white'
+                    : 'bg-gradient-to-r from-amber-50 via-white to-cyan-50 border-amber-300 hover:border-amber-400 text-slate-900'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -141,21 +141,24 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">
+                        Sponsored
+                      </span>
                       <span className="text-xs font-black truncate">
                         {isVerified ? 'Official Blue Tick Active' : 'Get Verified Badge & Blue Tick'}
                       </span>
                       <ShieldCheck size={14} className="text-[#00D2FF] fill-[#00D2FF]/20 shrink-0" />
                     </div>
-                    <p className="text-[11px] text-slate-400 truncate">
+                    <p className="text-[11px] text-slate-400 truncate mt-0.5">
                       {isVerified
                         ? '3x priority reach & VIP creator benefits enabled'
-                        : 'Preview how your profile will look with Blue Tick →'}
+                        : 'Read verification rules, register & pay to activate Blue Tick →'}
                     </p>
                   </div>
                 </div>
 
                 <div className="shrink-0 flex items-center gap-1 text-xs font-bold text-[#00D2FF]">
-                  <span>{isVerified ? 'View' : 'Preview'}</span>
+                  <span>{isVerified ? 'View' : 'Apply'}</span>
                   <ArrowRight size={13} />
                 </div>
               </button>
@@ -319,26 +322,29 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
         {/* Right Sidebar: Recommended Creators, Permanent Verified Card & Highlights */}
         <div className="hidden lg:block space-y-4 sticky top-20 self-start">
-          {/* 1. PERMANENT VERIFIED BADGE & BLUE TICK NOTIFICATION CARD */}
+          {/* 1. SPONSORED BLUE TICK & VERIFICATION PROGRAM CARD (Clickable Link) */}
           <div
             id="permanent-verified-badge-card"
-            className={`rounded-3xl p-5 border transition-all relative overflow-hidden shadow-lg ${
+            onClick={onOpenVerifiedModal}
+            role="button"
+            tabIndex={0}
+            className={`rounded-3xl p-5 border transition-all relative overflow-hidden shadow-lg cursor-pointer group hover:scale-[1.01] ${
               isVerified
                 ? isDarkMode
                   ? 'bg-gradient-to-br from-[#00D2FF]/15 via-[#080D26] to-purple-950/30 border-[#00D2FF]/40 ring-1 ring-[#00D2FF]/30'
                   : 'bg-gradient-to-br from-cyan-50 via-white to-blue-50/70 border-cyan-300 shadow-cyan-100/50'
                 : isDarkMode
-                ? 'bg-gradient-to-br from-[#00D2FF]/20 via-[#080D26]/95 to-[#FF2E93]/15 border-[#00D2FF]/35 hover:border-[#00D2FF]/60 ring-1 ring-[#00D2FF]/20'
-                : 'bg-gradient-to-br from-cyan-50/90 via-white to-pink-50/60 border-cyan-200 hover:border-cyan-300 shadow-md'
+                ? 'bg-gradient-to-br from-amber-500/15 via-[#080D26] to-[#00D2FF]/15 border-amber-500/40 hover:border-[#00D2FF]/60 ring-1 ring-amber-500/20'
+                : 'bg-gradient-to-br from-amber-50/80 via-white to-cyan-50/70 border-amber-300 hover:border-cyan-400 shadow-md'
             }`}
           >
-            {/* Top pill badge */}
+            {/* Top pill badge - Sponsored */}
             <div className="flex items-center justify-between mb-3.5">
               <span
                 className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
                   isVerified
                     ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-[#00D2FF]/20 text-[#00D2FF] border border-[#00D2FF]/40 animate-pulse'
+                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
                 }`}
               >
                 {isVerified ? (
@@ -348,17 +354,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                   </>
                 ) : (
                   <>
-                    <ShieldCheck size={11} />
-                    <span>Permanent Notification</span>
+                    <Sparkles size={11} className="text-amber-400" />
+                    <span>Sponsored</span>
                   </>
                 )}
               </span>
-              <span className="text-[10px] font-bold text-[#00D2FF]">Creator Pass</span>
+              <span className="text-[10px] font-bold text-slate-400">Rules & Verification</span>
             </div>
 
             {/* Header with Title and Description */}
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#00D2FF]/20 border border-[#00D2FF]/40 text-[#00D2FF] flex items-center justify-center shrink-0 shadow-sm">
+              <div className="w-10 h-10 rounded-2xl bg-[#00D2FF]/20 border border-[#00D2FF]/40 text-[#00D2FF] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition">
                 <ShieldCheck size={22} className="fill-[#00D2FF]/20" />
               </div>
               <div className="min-w-0">
@@ -369,7 +375,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <p className="text-[11px] text-slate-400 dark:text-slate-300 mt-1 leading-snug">
                   {isVerified
                     ? 'Your profile proudly displays the official blue checkmark with 3x feed boost active.'
-                    : 'Add the official blue checkmark badge on your profile with priority reach & pro perks.'}
+                    : 'Read official rules, register, and pay to activate the blue tick badge on your profile.'}
                 </p>
               </div>
             </div>
@@ -415,7 +421,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               <button
                 type="button"
                 id="open-verified-badge-modal-btn"
-                onClick={onOpenVerifiedModal}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenVerifiedModal();
+                }}
                 className={`w-full mt-3.5 py-2.5 px-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition shadow-md ${
                   isVerified
                     ? 'bg-slate-800 hover:bg-slate-700 text-white border border-white/20'
@@ -431,7 +440,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 ) : (
                   <>
                     <ShieldCheck size={14} />
-                    <span>Preview Profile & Get Blue Tick</span>
+                    <span>Read Rules & Get Blue Tick ($9.99/mo)</span>
                     <ArrowRight size={13} />
                   </>
                 )}

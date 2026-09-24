@@ -29,6 +29,8 @@ import { UserProfileModal, ProfileDetailsData } from './components/UserProfileMo
 import { CollabCallModal } from './components/CollabCallModal';
 import { EmailVerificationScreen } from './components/EmailVerificationScreen';
 import { AccountTypeSelectionModal } from './components/AccountTypeSelectionModal';
+import { MonetizationPage } from './pages/MonetizationPage';
+import { VerifiedBadgeModal } from './components/VerifiedBadgeModal';
 import { useAuth } from './context/AuthContext';
 
 export default function App() {
@@ -51,6 +53,7 @@ export default function App() {
   const [selectedCollab, setSelectedCollab] = useState<CollabRequest | null>(null);
   const [isCollabModalOpen, setIsCollabModalOpen] = useState(false);
   const [isCollabCallModalOpen, setIsCollabCallModalOpen] = useState(false);
+  const [isVerifiedModalOpen, setIsVerifiedModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Unread indicator state for navigation items (Messages, Notifications)
@@ -80,6 +83,7 @@ export default function App() {
     currentUser,
     userProfile,
     logout,
+    updateProfile,
     isEmailVerified,
     pendingGoogleUser,
     completeGoogleRegistration,
@@ -106,6 +110,8 @@ export default function App() {
           'notifications',
           'messages',
           'profile',
+          'settings',
+          'monetization',
         ].includes(hash)
       ) {
         setCurrentPage(hash);
@@ -408,6 +414,7 @@ export default function App() {
             onStartChatWithAuthor={handleStartChat}
             onViewAuthorProfile={(profile) => setSelectedDetailedProfile(profile)}
             onShareToStory={handleSharePostToStory}
+            onOpenVerifiedModal={() => setIsVerifiedModalOpen(true)}
             isDarkMode={isDarkMode}
           />
         )}
@@ -558,6 +565,7 @@ export default function App() {
             onNavigate={handleNavigate}
             onLikePost={handleLikePost}
             onOpenCreatePost={() => setIsCreatePostModalOpen(true)}
+            onOpenVerifiedModal={() => setIsVerifiedModalOpen(true)}
             onToggleTheme={() => setIsDarkMode(!isDarkMode)}
           />
         )}
@@ -567,6 +575,19 @@ export default function App() {
             isDarkMode={isDarkMode}
             onNavigate={handleNavigate}
             onToggleTheme={() => setIsDarkMode(!isDarkMode)}
+          />
+        )}
+
+        {currentPage === 'monetization' && (
+          <MonetizationPage
+            userProfile={userProfile}
+            isDarkMode={isDarkMode}
+            onNavigate={handleNavigate}
+            onOpenVerifiedModal={() => setIsVerifiedModalOpen(true)}
+            onUpgradeToCreator={async () => {
+              await updateProfile({ role: 'creator', accountType: 'creator' });
+              showToast('🎉 Your account has been upgraded to Creator! Monetization methods are now unlocked.');
+            }}
           />
         )}
       </main>
@@ -646,6 +667,20 @@ export default function App() {
         onClose={() => setChatModalOpen(false)}
         targetUser={chatRecipient}
         isDarkMode={isDarkMode}
+      />
+
+      {/* Verified Creator Badge Modal (Blue Tick Pass) */}
+      <VerifiedBadgeModal
+        isOpen={isVerifiedModalOpen}
+        onClose={() => setIsVerifiedModalOpen(false)}
+        userProfile={userProfile}
+        isDarkMode={isDarkMode}
+        onOpenAuth={() => {}}
+        onViewProfile={() => handleNavigate('profile')}
+        onVerifiedSuccess={async () => {
+          await updateProfile({ isVerified: true, verified: true, blueTick: true });
+          showToast('🎉 Blue Tick verified badge activated on your profile!');
+        }}
       />
     </div>
   );

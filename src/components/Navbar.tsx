@@ -122,20 +122,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right CTA Actions - Attractive & Small */}
         <div className="hidden md:flex items-center space-x-2.5">
-          {/* Dark / Light Toggle */}
-          <button
-            id="theme-toggle-btn"
-            onClick={onToggleTheme}
-            aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            className={`p-1.5 rounded-full transition-all duration-200 cursor-pointer ${
-              isDarkMode
-                ? 'bg-slate-800/80 text-amber-300 hover:bg-slate-700'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
-          >
-            {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
-
           {!isLoggedIn ? (
             /* Visitor NOT logged in: [Log In], [Get Started] */
             <>
@@ -211,16 +197,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile Hamburger Button */}
         <div className="flex items-center space-x-2 md:hidden">
-          <button
-            id="mobile-theme-toggle"
-            onClick={onToggleTheme}
-            className={`p-2 rounded-full ${
-              isDarkMode ? 'bg-slate-800 text-amber-300' : 'bg-slate-100 text-slate-700'
-            }`}
-          >
-            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-
           <button
             id="mobile-menu-toggle-btn"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

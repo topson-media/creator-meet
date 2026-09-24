@@ -10,15 +10,11 @@ import {
   Bell,
   MessagesSquare,
   Heart,
-  Zap,
   PlusCircle,
-  Moon,
-  Sun,
   LogOut,
   User as UserIcon,
   Settings,
-  ShieldCheck,
-  Check,
+  Coins,
 } from 'lucide-react';
 import { AccountBadge } from './AccountBadge';
 
@@ -47,6 +43,8 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const isFan = userProfile?.role === 'fan';
+
   const navItems = [
     { label: 'Home Feed', page: 'home' as PageRoute, icon: Home },
     { label: 'Reels', page: 'reels' as PageRoute, icon: Film },
@@ -54,9 +52,14 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
     { label: 'Notifications', page: 'notifications' as PageRoute, icon: Bell },
     { label: 'Messages', page: 'messages' as PageRoute, icon: MessagesSquare },
     { label: 'Fan Lounge', page: 'fans' as PageRoute, icon: Heart },
+    {
+      label: 'Monetization',
+      page: 'monetization' as PageRoute,
+      icon: Coins,
+      badge: isFan ? 'Creator Only' : undefined,
+    },
     { label: 'Profile', page: 'profile' as PageRoute, icon: UserIcon },
     { label: 'Settings & Privacy', page: 'settings' as PageRoute, icon: Settings },
-    { label: 'Features', page: 'features' as PageRoute, icon: Zap },
   ];
 
   const handleNavClick = (page: PageRoute) => {
@@ -95,16 +98,6 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
             <span>Create</span>
           </button>
 
-          {/* Theme toggle */}
-          <button
-            onClick={onToggleTheme}
-            className={`p-1.5 rounded-full ${
-              isDarkMode ? 'bg-slate-800 text-amber-300' : 'bg-slate-100 text-slate-700'
-            }`}
-          >
-            {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
-
           {/* Menu button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -129,33 +122,6 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
               : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
-          {/* Profile row */}
-          <button
-            onClick={() => {
-              setMenuOpen(false);
-              onOpenProfile();
-            }}
-            className={`w-full flex items-center gap-3 p-2 rounded-xl border mb-2 cursor-pointer text-left ${
-              isDarkMode ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'
-            }`}
-          >
-            <img
-              src={userAvatar}
-              alt={displayName}
-              referrerPolicy="no-referrer"
-              className="w-9 h-9 rounded-full object-cover ring-2 ring-[#FF2E93]"
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1">
-                <span className="text-xs font-bold block truncate">{userProfile?.fullName || displayName}</span>
-                {(userProfile?.isVerified || userProfile?.verified || userProfile?.blueTick) && (
-                  <ShieldCheck size={14} className="text-[#00D2FF] fill-[#00D2FF]/20 shrink-0" />
-                )}
-              </div>
-              <span className={`text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{displayName}</span>
-            </div>
-            {userProfile?.role && <AccountBadge role={userProfile.role} size="sm" />}
-          </button>
 
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -179,6 +145,11 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
               >
                 <Icon size={16} />
                 <span className="flex-1 text-left">{item.label}</span>
+                {item.badge && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-400 font-bold border border-pink-500/30">
+                    {item.badge}
+                  </span>
+                )}
                 {hasUnread && (
                   <span
                     id={`mobile-unread-dot-${item.page}`}

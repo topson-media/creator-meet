@@ -14,9 +14,25 @@ export type PageRoute =
   | 'login'
   | 'signup'
   | 'profile'
-  | 'settings';
+  | 'settings'
+  | 'monetization';
 
 export type UserRole = 'creator' | 'fan';
+
+export interface CreatorMonetizationState {
+  contentMonetizationEnabled?: boolean;
+  watchTimeHours?: number; // target: 4000
+  reelViews90Days?: number; // target: 300000
+  followersCount?: number; // target: 10000
+  starsEnabled?: boolean;
+  totalStarsReceived?: number;
+  starBalanceUsd?: number;
+  subscriptionEnabled?: boolean;
+  subscriptionMonthlyPrice?: number; // user custom price per month
+  subscriberCount?: number;
+  totalEarningsUsd?: number;
+  payoutMethod?: string;
+}
 
 export interface UserProfile {
   id: string;
@@ -57,6 +73,7 @@ export interface UserProfile {
   blueTick?: boolean;
   subscriptionPlan?: 'free' | 'verified_creator' | 'elite_creator';
   verifiedAt?: string;
+  monetization?: CreatorMonetizationState;
   createdAt: string;
   updatedAt?: string;
 }

@@ -31,10 +31,16 @@ import {
   Smartphone,
   KeyRound,
   ShieldCheck,
+  Coins,
+  Crown,
+  Star,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { AccountBadge } from '../components/AccountBadge';
 import { ShareProfileModal } from '../components/ShareProfileModal';
+import { SendStarsModal } from '../components/SendStarsModal';
+import { SubscribeModal } from '../components/SubscribeModal';
+import { UserProfileModal } from '../components/UserProfileModal';
 import { Post, Reel, PageRoute, UserRole } from '../types';
 
 interface ProfilePageProps {
@@ -78,6 +84,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isSendStarsModalOpen, setIsSendStarsModalOpen] = useState(false);
+  const [isSubscribeModalOpen, setIsSubscribeModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   // Sync initialOpenSettings if changed externally
   React.useEffect(() => {
@@ -90,6 +99,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [copiedToast, setCopiedToast] = useState(false);
   const [saveSuccessToast, setSaveSuccessToast] = useState(false);
+  const [statusToast, setStatusToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setStatusToast(msg);
+    setTimeout(() => setStatusToast(null), 3000);
+  };
 
   // Profile Form State
   const [editFullName, setEditFullName] = useState(userProfile?.fullName || 'Topson Media');
@@ -396,6 +411,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         </div>
       </div>
 
+      {statusToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#00D2FF] text-slate-950 font-bold px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2 text-xs sm:text-sm animate-bounce">
+          <Check size={16} strokeWidth={3} />
+          <span>{statusToast}</span>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Cover Banner with Change Cover Icon */}
         <div className="relative h-44 sm:h-64 rounded-3xl overflow-hidden mt-4 shadow-md bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 group">
@@ -473,6 +495,49 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               >
                 <Share2 size={16} />
               </button>
+
+              {/* If Creator: Monetization Hub + Preview Visitor View */}
+              {userProfile?.role === 'creator' ? (
+                <>
+                  <button
+                    type="button"
+                    id="profile-monetization-btn"
+                    onClick={() => onNavigate('monetization')}
+                    className="px-3.5 py-2 rounded-2xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 dark:text-amber-300 text-xs sm:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+                    title="Creator Monetization Hub"
+                  >
+                    <Coins size={15} className="text-amber-400" />
+                    <span className="hidden sm:inline">Monetization</span>
+                    <span className="sm:hidden">Earn</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    id="profile-preview-visitor-btn"
+                    onClick={() => setIsPreviewModalOpen(true)}
+                    className="px-3 py-2 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs sm:text-sm font-bold transition cursor-pointer flex items-center gap-1.5"
+                    title="Preview Visitor View (See what followers see when asked to subscribe & send gifts)"
+                  >
+                    <Eye size={15} />
+                    <span className="hidden sm:inline">Visitor View</span>
+                  </button>
+                </>
+              ) : (
+                /* Fan Account: Monetization methods are restricted */
+                <button
+                  type="button"
+                  id="profile-upgrade-creator-btn"
+                  onClick={async () => {
+                    await updateProfile({ role: 'creator', accountType: 'creator' });
+                    showToast('🎉 Switched to Creator Account! Monetization is now available.');
+                  }}
+                  className="px-3.5 py-2 rounded-2xl border border-pink-500/30 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 text-xs sm:text-sm font-bold transition cursor-pointer flex items-center gap-1.5"
+                  title="Fan accounts cannot get monetization methods. Upgrade to Creator to monetize."
+                >
+                  <Sparkles size={14} />
+                  <span>Become Creator</span>
+                </button>
+              )}
 
               <button
                 onClick={onOpenCreatePost}
@@ -1593,6 +1658,51 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         userProfile={userProfile}
         isDarkMode={isDarkMode}
       />
+
+      {/* Send Stars Modal */}
+      <SendStarsModal
+        isOpen={isSendStarsModalOpen}
+        onClose={() => setIsSendStarsModalOpen(false)}
+        creatorProfile={userProfile}
+        isDarkMode={isDarkMode}
+      />
+
+      {/* Subscribe to Creator Modal */}
+      <SubscribeModal
+        isOpen={isSubscribeModalOpen}
+        onClose={() => setIsSubscribeModalOpen(false)}
+        creatorProfile={userProfile}
+        isDarkMode={isDarkMode}
+      />
+
+      {/* Visitor View Preview Modal */}
+      {isPreviewModalOpen && userProfile && (
+        <UserProfileModal
+          isOpen={isPreviewModalOpen}
+          onClose={() => setIsPreviewModalOpen(false)}
+          profile={{
+            id: userProfile.id || 'current-user-preview',
+            name: userProfile.fullName || 'Alex Rivera',
+            username: userProfile.username || 'alexcreator',
+            avatar:
+              userProfile.avatar ||
+              'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+            role: userProfile.role || 'creator',
+            verified: Boolean(userProfile.verified || userProfile.blueTick),
+            bio: userProfile.bio,
+            country: userProfile.country,
+            flag: userProfile.flag,
+            category: userProfile.category || 'Filmmaking & Production',
+            followersCount: 14200,
+            followingCount: 340,
+            collabOpen: true,
+            collabRole: 'Video Editor & Colorist',
+            monetizationEnabled: true,
+            monthlyPrice: 9.99,
+          }}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </div>
   );
 };

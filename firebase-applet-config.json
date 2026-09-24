@@ -1,8 +1,12 @@
 {
-  "apiKey": "AIzaSyCQshZA0az7e642_h_euTEwKuIDDd889uy",
-  "authDomain": "creator-meet-app.firebaseapp.com",
   "projectId": "creator-meet-app",
+  "appId": "1:700692888483:web:a1aab93557f92637bd3816",
+  "apiKey": "AIzaSyCQSHzAOaz7e642_h_euTEwKuIDDd889uY",
+  "authDomain": "creator-meet-app.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
   "storageBucket": "creator-meet-app.firebasestorage.app",
   "messagingSenderId": "700692888483",
-  "appId": "1:700692888483:web:a1aab93557f92637bd3816"
+  "measurementId": "",
+  "oAuthClientId": "",
+  "recaptchaSiteKey": ""
 }

@@ -11,13 +11,10 @@ import {
   Heart,
   Zap,
   PlusCircle,
-  Moon,
-  Sun,
   LogOut,
   User as UserIcon,
   Settings,
-  ShieldCheck,
-  Check,
+  Coins,
 } from 'lucide-react';
 
 interface SidebarNavProps {
@@ -44,6 +41,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
   onOpenProfile,
   unreadMap,
 }) => {
+  const isFan = userProfile?.role === 'fan';
+
   const navItems: { label: string; page: PageRoute; icon: any; badge?: string }[] = [
     { label: 'Home Feed', page: 'home' as PageRoute, icon: Home },
     { label: 'Reels', page: 'reels' as PageRoute, icon: Film },
@@ -51,9 +50,14 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
     { label: 'Notifications', page: 'notifications' as PageRoute, icon: Bell },
     { label: 'Messages', page: 'messages' as PageRoute, icon: MessagesSquare },
     { label: 'Fan Lounge', page: 'fans' as PageRoute, icon: Heart },
+    {
+      label: 'Monetization',
+      page: 'monetization' as PageRoute,
+      icon: Coins,
+      badge: isFan ? 'Creator Only' : 'Earn',
+    },
     { label: 'Profile', page: 'profile' as PageRoute, icon: UserIcon },
     { label: 'Settings & Privacy', page: 'settings' as PageRoute, icon: Settings },
-    { label: 'Featured', page: 'features' as PageRoute, icon: Zap },
   ];
 
   const displayName = userProfile?.username
@@ -137,66 +141,17 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
         </div>
       </div>
 
-      {/* User Profile preview chip with Blue Tick */}
-      <div className="p-3 border-t border-inherit">
-        <button
-          onClick={onOpenProfile}
-          id="sidebar-user-profile-btn"
-          className={`w-full flex items-center gap-2.5 p-2 rounded-2xl transition cursor-pointer text-left ${
-            isDarkMode ? 'hover:bg-white/5' : 'hover:bg-slate-100'
-          }`}
-          title="View Your Profile"
-        >
-          <div className="relative shrink-0">
-            <img
-              src={userAvatar}
-              alt={displayName}
-              referrerPolicy="no-referrer"
-              className="w-9 h-9 rounded-full object-cover ring-1 ring-[#00D2FF]"
-            />
-            {(userProfile?.isVerified || userProfile?.verified || userProfile?.blueTick) && (
-              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#00D2FF] text-slate-950 rounded-full flex items-center justify-center shadow-xs">
-                <Check size={9} strokeWidth={3} />
-              </div>
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1">
-              <span className="text-xs font-bold truncate block">{userProfile?.fullName || displayName}</span>
-              {(userProfile?.isVerified || userProfile?.verified || userProfile?.blueTick) && (
-                <ShieldCheck size={13} className="text-[#00D2FF] fill-[#00D2FF]/20 shrink-0" />
-              )}
-            </div>
-            <span className="text-[10px] text-slate-400 block truncate">{displayName}</span>
-          </div>
-        </button>
-      </div>
-
-      {/* Bottom Theme Toggle & Logout */}
+      {/* Bottom Clean Logout Button (Theme is strictly managed in Settings) */}
       <div className="p-3.5 border-t border-inherit">
-        <div className="flex items-center justify-between px-1">
-          <button
-            onClick={onToggleTheme}
-            aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition cursor-pointer ${
-              isDarkMode
-                ? 'text-amber-300 hover:bg-slate-800'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
-            <span className="text-[11px]">{isDarkMode ? 'Light' : 'Dark'}</span>
-          </button>
-
-          <button
-            onClick={onLogout}
-            className="flex items-center gap-1 text-[11px] font-semibold text-rose-400 hover:text-rose-500 hover:bg-rose-500/10 px-2.5 py-1.5 rounded-full transition cursor-pointer"
-            title="Log out of your account"
-          >
-            <LogOut size={13} />
-            <span>Log out</span>
-          </button>
-        </div>
+        <button
+          onClick={onLogout}
+          id="sidebar-logout-btn"
+          className="w-full flex items-center justify-center gap-2 text-xs font-semibold text-rose-400 hover:text-rose-500 hover:bg-rose-500/10 px-3 py-2 rounded-xl transition cursor-pointer"
+          title="Log out of your account"
+        >
+          <LogOut size={15} />
+          <span>Log Out</span>
+        </button>
       </div>
     </aside>
   );
